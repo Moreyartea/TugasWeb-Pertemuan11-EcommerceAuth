@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,11 @@ class Order extends Model
         return [
             'total_amount' => 'decimal:2',
         ];
+    }
+
+    protected function totalFormatted(): Attribute
+    {
+        return Attribute::get(fn () => 'Rp '.number_format((float) $this->total_amount, 0, ',', '.'));
     }
 
     public function user(): BelongsTo

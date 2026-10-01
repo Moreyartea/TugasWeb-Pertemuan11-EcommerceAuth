@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,6 +44,17 @@ class Product extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    /** Harga dalam format Rupiah, mis. "Rp 250.000". */
+    protected function priceFormatted(): Attribute
+    {
+        return Attribute::get(fn () => 'Rp '.number_format((float) $this->price, 0, ',', '.'));
+    }
+
+    public function scopeInStock(Builder $query): Builder
+    {
+        return $query->where('stock', '>', 0);
     }
 
     public function scopeLowStock(Builder $query): Builder

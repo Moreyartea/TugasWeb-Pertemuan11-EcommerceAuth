@@ -14,23 +14,43 @@ class ProductForm
     {
         return $schema
             ->components([
-                Select::make('category_id')
-                    ->relationship('category', 'name')
-                    ->required(),
                 TextInput::make('name')
+                    ->label('Nama produk')
+                    ->required()
+                    ->maxLength(255),
+                Select::make('category_id')
+                    ->label('Kategori')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
+                Select::make('tags')
+                    ->label('Tag')
+                    ->relationship('tags', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->columnSpanFull(),
                 Textarea::make('description')
+                    ->label('Deskripsi')
+                    ->rows(4)
                     ->columnSpanFull(),
                 TextInput::make('price')
+                    ->label('Harga')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->minValue(0)
+                    ->prefix('Rp'),
                 TextInput::make('stock')
+                    ->label('Stok')
                     ->required()
                     ->numeric()
+                    ->minValue(0)
                     ->default(0),
                 FileUpload::make('image')
-                    ->image(),
+                    ->label('Gambar')
+                    ->image()
+                    ->directory('products')
+                    ->columnSpanFull(),
             ]);
     }
 }

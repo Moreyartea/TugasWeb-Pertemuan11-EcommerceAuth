@@ -1,30 +1,29 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+    <head>@include('layouts.partials-head', ['title' => $title ?? null])</head>
+    <body>
+        <div class="auth">
+            <aside class="auth-side">
+                <a href="{{ route('home') }}" class="brand">
+                    <span class="brand-mark"><x-application-logo /></span> {{ config('app.name') }}
                 </a>
-            </div>
+                <div>
+                    <h2>Belanja pintar, akses aman, kontrol penuh.</h2>
+                    <p>Platform e-commerce dengan autentikasi berlapis: hak akses berbasis peran untuk admin, editor, dan pelanggan.</p>
+                    <ul class="auth-points">
+                        <li><b>🔐</b> Login &amp; registrasi aman dengan Laravel Breeze</li>
+                        <li><b>🛡️</b> Middleware role &amp; Policy per-record</li>
+                        <li><b>📦</b> Katalog 60+ produk dengan relasi Eloquent</li>
+                    </ul>
+                </div>
+                <span class="small" style="color: rgba(255,255,255,.55)">Tugas Rutin 11 · Pemrograman Web</span>
+            </aside>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
+            <section class="auth-main">
+                <div class="auth-card">
+                    {{ $slot }}
+                </div>
+            </section>
         </div>
     </body>
 </html>

@@ -3,46 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 
 class PostController extends Controller
 {
-    public function edit(Post $post)
+    public function index(): View
     {
-        Gate::authorize('update', $post);
-
-        return response()->json([
-            'message' => 'Anda diizinkan mengedit post ini.',
-            'post' => $post,
+        return view('posts.index', [
+            'posts' => Post::with('user')->latest()->get(),
         ]);
     }
 
-    public function update(Request $request, Post $post)
+    public function edit(Post $post): View
     {
         Gate::authorize('update', $post);
 
-        $data = $request->validate([
+        return view('posts.edit', compact('post'));
+    }
+
+    public function update(Request $request, Post $post): RedirectResponse
+    {
+        Gate::authorize('update', $post);
+
+        $post->update($request->validate([
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string'],
-        ]);
+        ]));
 
-        $post->update($data);
-
-        return response()->json([
-            'message' => 'Post berhasil diperbarui.',
-            'post' => $post,
-        ]);
+        return redirect()->route('posts.index')->with('status', 'Post berhasil diperbarui.');
     }
 
-    public function destroy(Post $post)
+    public function destroy(Post $post): RedirectResponse
     {
         Gate::authorize('delete', $post);
 
         $post->delete();
 
-        return response()->json([
-            'message' => 'Post berhasil dihapus.',
-        ]);
+        return redirect()->route('posts.index')->with('status', 'Post berhasil dihapus.');
     }
 }

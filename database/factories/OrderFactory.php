@@ -12,6 +12,7 @@ class OrderFactory extends Factory
         return [
             'user_id' => User::factory(),
             'total_amount' => 0,
+            'created_at' => fake()->dateTimeBetween('-60 days', 'now'),
             'status' => fake()->randomElement([
                 'pending',
                 'processing',

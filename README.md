@@ -1,59 +1,63 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NusaMart — Tugas Rutin 11: E-Commerce DB + Secure Auth
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 · Breeze · Eloquent · Filament 4 · SQLite/MySQL
 
-## About Laravel
+![Beranda](docs/screenshots/home.png)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Checklist requirement
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| # | Requirement | Lokasi |
+|---|-------------|--------|
+| 1 | Migrations 7 tabel + FK constraints | `database/migrations` — `categories`, `products`, `orders`, `order_items`, `tags`, `product_tag`, kolom `role` di `users` (+ `posts`) |
+| 2 | Seeders + factories, 50+ produk realistis | `DatabaseSeeder` (64 produk, 9 kategori, 10 tag), `ProductFactory` (katalog 72 produk nyata) |
+| 3 | Model + relationships + ≥1 scope | `app/Models` — `Product::lowStock()`, `priceAbove()`, `inStock()` |
+| 4 | Dokumentasi 5 query Tinker | [`docs/TINKER.md`](docs/TINKER.md) |
+| 5 | Breeze (login/register/logout) | `routes/auth.php`, `app/Http/Controllers/Auth` |
+| 6 | Multi-role + custom middleware | `RoleMiddleware` (alias `role:`) di `bootstrap/app.php` |
+| 7 | PostPolicy edit/delete | `app/Policies/PostPolicy.php`, `PostController` |
+| 8 | Route protection + uji 2 role | `routes/web.php`, `tests/Feature/RoleAccessTest.php` |
+| ⭐ | Filament admin panel | `/admin` — CRUD produk, filter, widget statistik |
+| ⭐ | Demo eager loading | `/demo/eager-loading` |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Menjalankan
 
-## Learning Laravel
+```bash
+composer install && npm install
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite          # jika memakai SQLite (default)
+php artisan migrate:fresh --seed
+npm run build                           # atau npm run dev
+php artisan serve
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Seeder berjalan di SQLite **maupun** MySQL. Untuk MySQL (Laragon) ubah `DB_*` di `.env`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+> Tampilan memakai `public/css/shop.css` (CSS biasa, tanpa build). `npm run build` hanya diperlukan untuk Alpine.js.
 
-## Laravel Sponsors
+## Akun demo (password: `password`)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Role | Email | Akses |
+|------|-------|-------|
+| admin | admin@example.com | semua area, semua post, panel Filament |
+| editor | editor@example.com | area editor, post **miliknya**, panel Filament |
+| editor | editor2@example.com | editor kedua — untuk menguji PostPolicy |
+| user | user@example.com | etalase, dashboard, profil |
 
-### Premium Partners
+## Skenario uji incognito (2 role)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Buka jendela normal (login **admin**) dan jendela Incognito (login **user**):
 
-## Contributing
+| URL | admin | editor | user | guest |
+|-----|:----:|:----:|:----:|:----:|
+| `/dashboard` | 200 | 200 | 200 | → login |
+| `/editor-area`, `/posts`, `/demo/eager-loading` | 200 | 200 | **403** | → login |
+| `/admin-area` | 200 | **403** | **403** | → login |
+| `/admin` (Filament) | 200 | 200 | **403** | → login Filament |
+| Edit/hapus post milik orang lain | ✅ | **403** | **403** | → login |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Otomatis: `php artisan test` (46 test, termasuk role, policy, Filament, seeder).
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Catatan keamanan
+- `role` tidak bisa diisi saat registrasi (selalu `user`).
+- Otorisasi per-record memakai `Gate::authorize` + `PostPolicy`; tombol di UI memakai `@can`.
+- Panel Filament dibatasi lewat `User::canAccessPanel()` (admin & editor).
